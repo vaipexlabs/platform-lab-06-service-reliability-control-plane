@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"sort"
 	"strings"
@@ -14,7 +13,7 @@ import (
 	"github.com/prometheus/prometheus/promql/parser"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/contracts"
-	"gopkg.in/yaml.v3"
+	"github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/internal/document"
 )
 
 const schemaName = "service-reliability.schema.json"
@@ -82,7 +81,7 @@ func (v *Validator) ValidateFile(path string) (*ServiceReliability, error) {
 // Validate parses one YAML or JSON document, applies the schema, then applies
 // semantic checks that JSON Schema cannot express clearly.
 func (v *Validator) Validate(data []byte) (*ServiceReliability, error) {
-	jsonData, err := yamlToJSON(data)
+	jsonData, err := document.Normalize(data)
 	if err != nil {
 		return nil, fmt.Errorf("decode contract: %w", err)
 	}
@@ -111,26 +110,6 @@ func (v *Validator) Validate(data []byte) (*ServiceReliability, error) {
 		return nil, &ValidationError{Problems: problems}
 	}
 	return &contract, nil
-}
-
-func yamlToJSON(data []byte) ([]byte, error) {
-	decoder := yaml.NewDecoder(bytes.NewReader(data))
-	var document any
-	if err := decoder.Decode(&document); err != nil {
-		return nil, err
-	}
-	if document == nil {
-		return nil, errors.New("document is empty")
-	}
-
-	var trailing any
-	if err := decoder.Decode(&trailing); err != io.EOF {
-		if err == nil {
-			return nil, errors.New("multiple YAML or JSON documents are not allowed")
-		}
-		return nil, err
-	}
-	return json.Marshal(document)
 }
 
 func structuralError(err error) error {

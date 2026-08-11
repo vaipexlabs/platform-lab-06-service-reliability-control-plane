@@ -72,7 +72,9 @@ zero traffic, insufficient samples, stale telemetry, and query failure as
 ## Objective and Error-Budget Semantics
 
 `target` is the required percentage of good events over `window`. For a 99.9%
-target, the allowed bad-event fraction is 0.1%.
+target, the allowed bad-event fraction is 0.1%. Targets must be below 100%
+because a 100% target has no finite error budget and cannot produce a useful
+burn rate.
 
 ```text
 allowed bad fraction = 1 - target fraction
@@ -123,4 +125,3 @@ Some rules require semantic validation and belong to the next milestone:
 
 Separating structural and semantic validation keeps the schema portable while
 still producing precise, human-readable feedback through the platform tooling.
-

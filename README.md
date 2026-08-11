@@ -101,6 +101,27 @@ unique identifiers, duration ordering, supported telemetry adapters, PromQL
 syntax, and consistent delivery thresholds. Failures identify the exact field
 path and return a non-zero exit code suitable for local hooks or CI.
 
+### Evaluate SLOs and error budgets
+
+Evaluate the contract against a deterministic, provider-neutral evidence
+snapshot:
+
+```bash
+go run ./cmd/reliabilityctl evaluate \
+  --contract contracts/examples/checkout-service.yaml \
+  --evidence contracts/examples/checkout-service-evidence.yaml
+```
+
+The JSON result reports each objective's target, attainment, allowed and
+observed bad-event fractions, burn rate, budget consumed, budget remaining,
+and `met`, `breached`, or `unknown` status. The included healthy snapshot
+produces two met objectives with a burn rate of `0.5` and 50% budget remaining.
+
+Unknown evidence is explicit: missing, stale, future-dated, misaligned,
+zero-traffic, and insufficient-sample inputs never become false success. See
+[SLO Evaluation and Error Budgets](docs/evaluation-engine.md) for the formulas,
+evidence rules, and deterministic fixtures.
+
 ## Delivery Flow
 
 ![Vaipex Service Reliability Control Plane flow](docs/images/vaipex-service-reliability-control-plane-flow.svg)
@@ -139,7 +160,7 @@ be added and verified through the milestones below.
   SLIs, SLOs, ownership, and evaluation windows.
 - [x] Build contract validation with clear feedback and representative valid
   and invalid examples.
-- [ ] Implement the SLO evaluator and error-budget calculation engine.
+- [x] Implement the SLO evaluator and error-budget calculation engine.
 - [ ] Add reproducible service telemetry and Prometheus-based evidence.
 - [ ] Add multi-window burn-rate alerts, dashboards, and linked runbooks.
 - [ ] Add an explainable reliability decision interface for delivery systems.

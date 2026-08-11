@@ -152,7 +152,7 @@
         "target": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "maximum": 100,
+          "exclusiveMaximum": 100,
           "description": "Required percentage of good events in the objective window."
         },
         "window": {
@@ -268,4 +268,3 @@
     }
   }
 }
-

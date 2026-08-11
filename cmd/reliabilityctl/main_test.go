@@ -25,6 +25,25 @@ func TestRunValidContract(t *testing.T) {
 	}
 }
 
+func TestRunEvaluate(t *testing.T) {
+	t.Parallel()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	contractPath := filepath.Join("..", "..", "contracts", "examples", "checkout-service.yaml")
+	evidencePath := filepath.Join("..", "..", "contracts", "examples", "checkout-service-evidence.yaml")
+	args := []string{"evaluate", "--contract", contractPath, "--evidence", evidencePath}
+
+	if code := run(args, &stdout, &stderr); code != 0 {
+		t.Fatalf("run() code = %d, want 0; stderr = %s", code, stderr.String())
+	}
+	for _, expected := range []string{`"kind": "ReliabilityEvaluation"`, `"met": 2`, `"unknown": 0`} {
+		if !strings.Contains(stdout.String(), expected) {
+			t.Errorf("stdout does not contain %q: %s", expected, stdout.String())
+		}
+	}
+}
+
 func TestRunInvalidContract(t *testing.T) {
 	t.Parallel()
 

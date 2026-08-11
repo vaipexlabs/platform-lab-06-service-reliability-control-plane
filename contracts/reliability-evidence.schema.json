@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/blob/main/contracts/reliability-evidence.schema.json",
+  "title": "Vaipex Reliability Evidence Snapshot",
+  "description": "Provider-neutral good-event and total-event evidence for deterministic SLO evaluation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "metadata", "evaluationTime", "objectives"],
+  "properties": {
+    "apiVersion": { "const": "reliability.vaipex.io/v1alpha1" },
+    "kind": { "const": "ReliabilityEvidence" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["serviceName"],
+      "properties": {
+        "serviceName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 63,
+          "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+        }
+      }
+    },
+    "evaluationTime": { "type": "string", "format": "date-time" },
+    "objectives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["objectiveId", "windowStart", "windowEnd", "observedAt", "goodEvents", "totalEvents"],
+        "properties": {
+          "objectiveId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 63,
+            "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+          },
+          "windowStart": { "type": "string", "format": "date-time" },
+          "windowEnd": { "type": "string", "format": "date-time" },
+          "observedAt": { "type": "string", "format": "date-time" },
+          "goodEvents": { "type": "number", "minimum": 0 },
+          "totalEvents": { "type": "number", "minimum": 0 }
+        }
+      }
+    }
+  }
+}
+

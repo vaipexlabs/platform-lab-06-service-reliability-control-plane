@@ -1,0 +1,19 @@
+apiVersion: reliability.vaipex.io/v1alpha1
+kind: ReliabilityEvidence
+metadata:
+  serviceName: checkout-service
+evaluationTime: 2026-08-11T12:00:00Z
+objectives:
+  - objectiveId: request-availability
+    windowStart: 2026-07-12T12:00:00Z
+    windowEnd: 2026-08-11T12:00:00Z
+    observedAt: 2026-08-11T11:58:00Z
+    goodEvents: 9995
+    totalEvents: 10000
+  - objectiveId: request-latency
+    windowStart: 2026-07-12T12:00:00Z
+    windowEnd: 2026-08-11T12:00:00Z
+    observedAt: 2026-08-11T11:58:00Z
+    goodEvents: 9950
+    totalEvents: 10000
+
