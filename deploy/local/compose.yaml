@@ -4,7 +4,12 @@ services:
       context: ../..
       dockerfile: deploy/local/Dockerfile
     ports:
-      - "18080:8080"
+      - "127.0.0.1:18080:8080"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
 
   prometheus:
@@ -17,7 +22,7 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ../../.local/prometheus-rules.yml:/etc/prometheus/rules/reliability.yml:ro
     ports:
-      - "19090:9090"
+      - "127.0.0.1:19090:9090"
     depends_on:
       - checkout-demo
     restart: unless-stopped
@@ -33,7 +38,7 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     ports:
-      - "13000:3000"
+      - "127.0.0.1:13000:3000"
     depends_on:
       - prometheus
     restart: unless-stopped

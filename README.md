@@ -1,88 +1,110 @@
 # Vaipex Service Reliability Control Plane
 
 An open reference implementation for turning service-level indicators into
-clear reliability objectives, actionable error budgets, and evidence-based
+clear reliability objectives, actionable error budgets, and explainable
 delivery decisions.
 
 Developed by **Vaipex Labs** for the developer and platform engineering
 community.
 
-![Status](https://img.shields.io/badge/Status-Foundation-6D5DFB)
+![Status](https://img.shields.io/badge/Status-Reference%20Complete-6D5DFB)
 ![Reliability](https://img.shields.io/badge/Focus-SLOs%20%26%20Error%20Budgets-0B5FFF)
 ![Prometheus](https://img.shields.io/badge/Telemetry-Prometheus-E6522C?logo=prometheus&logoColor=white)
 ![Grafana](https://img.shields.io/badge/Experience-Grafana-F46800?logo=grafana&logoColor=white)
-![Open Source](https://img.shields.io/badge/Model-Open%20Source-16A085)
-![License](https://img.shields.io/badge/License-Apache%202.0-blue)
+![Go](https://img.shields.io/badge/Implementation-Go-00ADD8?logo=go&logoColor=white)
 ![Continuous Validation](https://github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 
-[Project at a Glance](#project-at-a-glance) ·
-[Reliability Model](#reliability-model) ·
-[Reliability Contract](#reliability-contract) ·
-[Delivery Flow](#delivery-flow) ·
 [Two-Minute Demo](#two-minute-demo) ·
-[Dashboard and Alerts](#dashboard-and-alerts) ·
-[Decision Interface](#decision-interface) ·
-[Delivery Roadmap](#delivery-roadmap)
+[Delivery Flow](#delivery-flow) ·
+[Reliability Model](#reliability-model) ·
+[Core Capabilities](#core-capabilities) ·
+[Adoption](#adoption) ·
+[Operations](#operations-and-security) ·
+[Documentation](#documentation) ·
+[Contributing](#contributing)
 
 ## Project at a Glance
 
-| Area | Capability |
+| Area | Delivered capability |
 | --- | --- |
-| Reliability contracts | Version-controlled SLIs, SLO targets, evaluation windows, and ownership |
-| Objective evaluation | Consistent availability and latency calculations from service telemetry |
-| Error budgets | Remaining budget, consumption, and burn-rate signals for each objective |
-| Delivery decisions | Explainable proceed, caution, or pause recommendations based on reliability evidence |
-| Operational response | Fast- and slow-burn alerts connected to dashboards and runbooks |
-| Developer experience | A reproducible local journey with safe defaults and automated validation |
-| Governance | Service-level accountability without using individual productivity measures |
+| Reliability contracts | Version-controlled SLIs, SLO targets, windows, ownership, runbooks, and decision policy |
+| Validation | JSON Schema plus semantic and PromQL checks with precise field-level errors |
+| Objective evaluation | Availability and latency attainment from provider-neutral good/total-event evidence |
+| Error budgets | Consumption, remaining budget, and burn rate for every objective |
+| Operational response | Generated multi-window alerts, Grafana dashboard, and linked runbooks |
+| Delivery guidance | Explainable `proceed`, `caution`, `pause`, or `unknown` recommendations |
+| Developer experience | One-command healthy-to-breach journey with automatic cleanup |
+| Continuous validation | Race tests, static analysis, contract gates, and the complete Docker journey in CI |
+
+## Two-Minute Demo
+
+Prerequisites: Docker Desktop, Go 1.26 or newer, and `curl`.
+
+```bash
+./scripts/two-minute-demo.sh
+```
+
+The command validates the contract, starts the checkout demo, Prometheus, and
+Grafana, proves healthy evidence produces `proceed`, generates a controlled
+breach, verifies availability and latency burn-rate alerts, and proves the
+resulting evidence produces `pause`.
+
+The alert stage may wait for the contract's one-minute evaluation interval.
+The script prints the SLO calculations and decision reasons, then always
+removes its containers and network. The same journey runs in GitHub Actions.
+
+## Delivery Flow
+
+![Vaipex Service Reliability Control Plane flow](docs/images/vaipex-service-reliability-control-plane-flow.svg)
+
+1. A service owner declares SLIs, SLOs, evaluation windows, ownership, and
+   runbooks in a version-controlled reliability contract.
+2. Automated controls validate its structure, semantics, and PromQL.
+3. Prometheus-compatible telemetry supplies good- and total-event evidence.
+4. The control plane calculates attainment, burn rate, and remaining budget.
+5. Generated alerts, runbooks, and dashboards provide operational feedback.
+6. The decision interface recommends `proceed`, `caution`, `pause`, or
+   `unknown` and includes the evidence behind that result.
+7. Delivery systems and accountable teams choose how to apply the guidance.
 
 ## Why This Project Exists
 
-Teams frequently collect metrics without agreeing on what reliable service
-means. The result is noisy alerting, subjective release decisions, and a gap
-between product expectations and operational behavior.
+Teams often collect metrics without agreeing on what reliable service means.
+The result is noisy alerting, subjective release decisions, and a gap between
+product expectations and operational behavior.
 
-This project demonstrates a platform-owned reliability model: teams define
-objectives through a documented contract, the platform evaluates those
-objectives consistently, and the resulting error-budget evidence guides
-delivery and improvement decisions. The control plane informs decisions; it
-does not hide the evidence or replace accountable human ownership.
+This project demonstrates a platform-owned reliability model: service teams
+declare intent through a supported contract, the platform evaluates every
+service consistently, and transparent error-budget evidence guides delivery
+and improvement. The control plane informs decisions; it does not hide the
+evidence or replace human ownership.
 
 ## Reliability Model
 
 | Term | Plain-language meaning | Example |
 | --- | --- | --- |
 | SLI | What the system measures | Proportion of successful requests |
-| SLO | The reliability target for an SLI | 99.9% successful requests over 30 days |
-| Error budget | The unreliability allowed by the SLO | 0.1% of requests may fail in that window |
-| Burn rate | How quickly the error budget is being consumed | A burn rate of 2 consumes budget twice as fast as planned |
+| SLO | The internal reliability target | 99.9% successful requests over 30 days |
+| Error budget | The unreliability permitted by the SLO | 0.1% of requests may fail in the window |
+| Burn rate | How quickly that budget is being consumed | A burn rate of 2 consumes budget twice as fast as planned |
 | SLA | An external commitment and its consequences | A contractual 99.9% availability commitment |
 
 SLIs and SLOs are operational engineering tools. An SLA is a business or
-customer commitment and should normally be informed by—rather than used as a
-substitute for—the internal reliability model.
+customer commitment that should normally be informed by—not substituted for—the
+internal reliability model.
 
-## Reliability Contract
+## Core Capabilities
 
-Service teams declare reliability intent through a strict, versioned
-`ServiceReliability` document. The contract connects ownership and runbooks to
-availability and latency objectives, Prometheus-compatible evidence,
-multi-window burn-rate alerts, and explainable delivery policy thresholds.
+### Reliability contract and validation
 
-- Start with the [checkout-service example](contracts/examples/checkout-service.yaml).
-- Inspect the portable [JSON Schema](contracts/service-reliability.schema.json).
-- Read the [contract semantics and design boundaries](docs/reliability-contract.md).
-
-The interface is telemetry-adapter oriented. The reference implementation
-starts with Prometheus and PromQL while preserving a stable good-events /
-total-events model that another provider can implement.
-
-### Validate a contract
-
-Run the validator directly:
+The strict, versioned `ServiceReliability` contract connects service ownership
+to availability and latency objectives, Prometheus evidence, burn-rate alert
+policy, runbooks, and delivery thresholds.
 
 ```bash
-go run ./cmd/reliabilityctl validate contracts/examples/checkout-service.yaml
+go run ./cmd/reliabilityctl validate \
+  contracts/examples/checkout-service.yaml
 ```
 
 Expected result:
@@ -91,23 +113,18 @@ Expected result:
 valid: contracts/examples/checkout-service.yaml (service=checkout-service objectives=2)
 ```
 
-Or run the complete contract gate, which also proves that representative
-structural and semantic failures are rejected:
+The validator accepts YAML or JSON and combines the portable
+[JSON Schema](contracts/service-reliability.schema.json) with semantic checks
+for identifiers, duration ordering, adapter compatibility, PromQL, and policy
+thresholds. Run the complete positive and negative contract gate with:
 
 ```bash
 ./scripts/validate-contracts.sh
 ```
 
-The validator accepts YAML or JSON, uses the embedded canonical schema, checks
-URI formats, and then applies rules that JSON Schema cannot express clearly:
-unique identifiers, duration ordering, supported telemetry adapters, PromQL
-syntax, and consistent delivery thresholds. Failures identify the exact field
-path and return a non-zero exit code suitable for local hooks or CI.
+### SLO evaluation and error budgets
 
-### Evaluate SLOs and error budgets
-
-Evaluate the contract against a deterministic, provider-neutral evidence
-snapshot:
+Evaluate the included provider-neutral evidence:
 
 ```bash
 go run ./cmd/reliabilityctl evaluate \
@@ -115,83 +132,48 @@ go run ./cmd/reliabilityctl evaluate \
   --evidence contracts/examples/checkout-service-evidence.yaml
 ```
 
-The JSON result reports each objective's target, attainment, allowed and
-observed bad-event fractions, burn rate, budget consumed, budget remaining,
-and `met`, `breached`, or `unknown` status. The included healthy snapshot
-produces two met objectives with a burn rate of `0.5` and 50% budget remaining.
+The result exposes target and attainment percentages, good and total events,
+allowed and observed bad-event fractions, burn rate, budget consumption,
+remaining budget, and `met`, `breached`, or `unknown` status. Missing, stale,
+future-dated, misaligned, zero-traffic, and insufficient-sample evidence never
+becomes false success.
 
-Unknown evidence is explicit: missing, stale, future-dated, misaligned,
-zero-traffic, and insufficient-sample inputs never become false success. See
-[SLO Evaluation and Error Budgets](docs/evaluation-engine.md) for the formulas,
-evidence rules, and deterministic fixtures.
-
-### Evaluate live Prometheus evidence
-
-Prerequisites: Docker Desktop, Go 1.26 or newer, and `curl`.
+### Live Prometheus evidence
 
 ```bash
 ./scripts/start-local.sh
 ./scripts/generate-traffic.sh
 ./scripts/evaluate-live.sh
-./scripts/stop-local.sh
 ```
 
-The local platform runs an instrumented checkout service on
-`http://localhost:18080` and Prometheus on `http://localhost:19090`. The
-default traffic produces 99.95% availability and 99.5% latency attainment,
-with both objectives reporting a `0.5` burn rate and 50% budget remaining.
+The local platform exposes the demo service on `http://localhost:18080` and
+Prometheus on `http://localhost:19090`. `reliabilityctl collect` renders the
+contract's window-aware PromQL, queries Prometheus, and writes the same portable
+evidence consumed by the evaluation engine.
 
-`reliabilityctl collect` renders the contract's window-aware PromQL, queries
-Prometheus, and writes a portable evidence snapshot. The unchanged evaluation
-engine then calculates the reliability result. See [Live Prometheus
-Evidence](docs/live-prometheus.md) for the component boundaries, manual
-commands, failure behavior, traffic overrides, and cleanup.
+### Dashboard, alerts, and runbooks
 
-## Dashboard and Alerts
+Open the provisioned Grafana dashboard after starting the stack:
 
-The reliability contract is also the source for generated Prometheus
-recording rules and multi-window burn-rate alerts. This keeps the dashboard,
-alerts, evaluator, and service objectives aligned instead of maintaining
-parallel definitions by hand.
-
-Start the platform and generate healthy traffic:
-
-```bash
-./scripts/start-local.sh
-./scripts/generate-traffic.sh
+```text
+http://localhost:13000/d/vaipex-service-reliability
 ```
 
-Open the provisioned Grafana dashboard at
-`http://localhost:13000/d/vaipex-service-reliability`. It shows SLO
-attainment, remaining error budget, current burn rate, active alerts, request
-outcomes, and each evaluation window.
-
-Generate a deterministic reliability breach and verify the alerts:
+The contract generates recording rules and paired-window burn-rate alerts
+rather than relying on separately maintained definitions. The dashboard shows
+SLO attainment, budget remaining, burn rate, active alerts, request outcomes,
+and evaluation windows.
 
 ```bash
 ./scripts/generate-breach.sh
 ./scripts/verify-alerts.sh
-./scripts/evaluate-live.sh
 ```
 
-The verifier allows for the contract's one-minute rule evaluation interval.
-Fast-burn alerts use paired 5-minute and 1-hour windows; slow-burn alerts use
-paired 30-minute and 6-hour windows. Every generated alert links to the
-appropriate response runbook. Stop and remove the local stack when finished:
+Fast-burn alerts pair 5-minute and 1-hour windows. Slow-burn alerts pair
+30-minute and 6-hour windows. Generated alerts carry service, objective, team,
+severity, and response-runbook context.
 
-```bash
-./scripts/stop-local.sh
-```
-
-See [Dashboards, Alerts, and Runbooks](docs/dashboards-and-alerts.md) for the
-rule-generation flow, alert thresholds, verification commands, and response
-model.
-
-## Decision Interface
-
-`reliabilityctl decide` turns the validated contract and the same deterministic
-evidence used by the evaluator into a machine-readable delivery
-recommendation:
+### Explainable delivery decisions
 
 ```bash
 go run ./cmd/reliabilityctl decide \
@@ -199,116 +181,88 @@ go run ./cmd/reliabilityctl decide \
   --evidence contracts/examples/checkout-service-evidence.yaml
 ```
 
-The healthy example returns `proceed`. Explore the remaining policy outcomes:
+The `ReliabilityDecision` JSON includes the recommendation, active severities,
+policy thresholds, reason codes, objective IDs, and triggering values. Valid
+recommendations exit successfully because the interface is advisory; consumers
+choose how to enforce `caution`, `pause`, and `unknown`.
+
+Explore every deterministic state:
 
 ```bash
-# Low remaining budget returns caution.
+# caution: objectives are met, but little budget remains
 go run ./cmd/reliabilityctl decide \
   --contract contracts/examples/checkout-service.yaml \
   --evidence testdata/evidence/degraded.yaml
 
-# Exhausted budget returns pause.
+# pause: error budgets are exhausted
 go run ./cmd/reliabilityctl decide \
   --contract contracts/examples/checkout-service.yaml \
   --evidence testdata/evidence/exhausted.yaml
 
-# An active configured severity can independently return pause.
+# unknown: evidence is missing or stale
 go run ./cmd/reliabilityctl decide \
   --contract contracts/examples/checkout-service.yaml \
-  --evidence contracts/examples/checkout-service-evidence.yaml \
-  --active-severity page
+  --evidence testdata/evidence/missing-and-stale.yaml
 ```
 
-Every result includes the recommendation, active severities, policy thresholds,
-and structured reason codes with the values that triggered them. Valid
-recommendations exit successfully because this interface is advisory; a
-delivery system chooses whether and how to enforce the result. See the
-[Decision Interface](docs/decision-interface.md) for precedence, output
-semantics, and integration guidance.
+## Adoption
 
-## Delivery Flow
+Start with one owned service and one user-centered availability or latency
+journey. Adapt the contract and queries, connect production telemetry, route
+generated alerts through existing incident processes, and publish decisions in
+advisory mode before considering enforcement.
 
-![Vaipex Service Reliability Control Plane flow](docs/images/vaipex-service-reliability-control-plane-flow.svg)
+Reuse the contract, evidence model, calculations, generated rules, decision
+output, and automated verification. Replace the sample identities, metric
+names, thresholds, containers, and anonymous local access with
+organization-managed services and controls. Follow the
+[Adoption Guide](docs/adoption.md) for the complete staged approach.
 
-1. A service owner declares supported SLIs, SLO targets, evaluation windows,
-   ownership, and runbook metadata in a version-controlled contract.
-2. Automated validation checks the contract before it becomes active.
-3. Prometheus-compatible telemetry supplies request and latency evidence.
-4. The reliability engine evaluates objective attainment, remaining error
-   budget, and burn rate from the same transparent definitions.
-5. Dashboards, alerts, and a decision interface expose both the outcome and its
-   supporting evidence.
-6. Delivery workflows use that evidence to proceed, exercise caution, or pause
-   while teams restore reliability.
-7. Teams improve the service or its operating model and observe the result
-   through the next evaluation cycle.
-
-## Two-Minute Demo
-
-Prerequisites: Docker Desktop, Go 1.26 or newer, and `curl`.
-
-Run the complete reliability journey with one command:
+## Operations and Security
 
 ```bash
-./scripts/two-minute-demo.sh
+./scripts/start-local.sh
+./scripts/stop-local.sh
 ```
 
-The demo validates the contract, starts the complete local platform, proves
-healthy evidence produces `proceed`, generates a controlled breach, verifies
-availability and latency burn-rate alerts, and proves the resulting evidence
-produces `pause`. It prints the SLO calculations and decision reasons, then
-always removes the project containers and network.
+All published demo ports bind to `127.0.0.1`. The sample service runs as a
+non-root user with a read-only filesystem, dropped Linux capabilities, and
+`no-new-privileges`. Images and GitHub Actions are pinned immutably, CI uses
+read-only repository permissions, and dependency updates are automated.
 
-The alert stage may wait for the contract's one-minute evaluation interval.
-The same command runs in GitHub Actions after the fast code and contract quality
-gate. See [Continuous Validation](docs/continuous-validation.md) for the exact
-checks, stages, and security boundaries.
+This is a local reference environment, not a production distribution. It does
+not provide production identity, TLS, authorization, tenant isolation,
+durability, high availability, backup, or external secret management. See the
+[Operations Guide](docs/operations.md) and [Security Policy](SECURITY.md)
+before adapting it.
 
-## Delivery Roadmap
+## Documentation
 
-- [x] Establish the open-source repository, project narrative, reliability
-  vocabulary, standard flow, and Apache 2.0 license.
-- [x] Define a provider-neutral, versioned reliability contract for services,
-  SLIs, SLOs, ownership, and evaluation windows.
-- [x] Build contract validation with clear feedback and representative valid
-  and invalid examples.
-- [x] Implement the SLO evaluator and error-budget calculation engine.
-- [x] Add reproducible service telemetry and Prometheus-based evidence.
-- [x] Add multi-window burn-rate alerts, dashboards, and linked runbooks.
-- [x] Add an explainable reliability decision interface for delivery systems.
-- [x] Automate validation and the complete two-minute journey in CI.
-- [ ] Polish security, operations, contribution, and adoption guidance.
-
-## Planned Repository Map
-
-```text
-.
-├── .github/workflows/       # Contract and end-to-end validation
-├── cmd/                     # Reliability control-plane entry points
-├── contracts/               # Versioned service reliability definitions
-├── dashboards/              # Reliability and error-budget views
-├── deploy/                  # Reproducible local platform configuration
-├── docs/                    # Architecture, operations, and adoption guidance
-├── examples/                # Representative services and objectives
-├── internal/                # Evaluation and decision logic
-├── rules/                   # Recording and burn-rate alert rules
-└── scripts/                 # Setup, validation, demo, and cleanup workflows
-```
-
-The map communicates the intended product boundaries. Directories are created
-only when their corresponding milestone delivers a working capability.
+| Guide | Purpose |
+| --- | --- |
+| [Reliability contract](docs/reliability-contract.md) | Contract fields, semantics, policy, and compatibility |
+| [Evaluation engine](docs/evaluation-engine.md) | SLO formulas, evidence rules, and fixtures |
+| [Live Prometheus](docs/live-prometheus.md) | Telemetry adapter and live evidence flow |
+| [Dashboards and alerts](docs/dashboards-and-alerts.md) | Generated rules, alert strategy, dashboard, and runbooks |
+| [Decision interface](docs/decision-interface.md) | Recommendation precedence, reasons, and delivery integration |
+| [Continuous validation](docs/continuous-validation.md) | CI gates and end-to-end journey |
+| [Adoption guide](docs/adoption.md) | Incremental organizational rollout |
+| [Operations guide](docs/operations.md) | Local lifecycle, diagnostics, cleanup, and production boundaries |
 
 ## Design Principles
 
 - Reliability definitions are explicit, versioned, reviewable, and owned.
 - Every status and recommendation is traceable to objective evidence.
-- Missing or stale telemetry is reported as unknown, never healthy.
-- Alerting focuses on meaningful error-budget consumption rather than isolated
-  threshold noise.
-- Delivery controls are transparent, reversible, and configurable by policy.
-- The reference implementation remains provider-neutral where practical.
-- Signals describe services and systems, never individual performance.
+- Missing or stale telemetry is `unknown`, never healthy.
+- Alerts focus on meaningful budget consumption rather than isolated noise.
+- Delivery controls are transparent, reversible, and policy-driven.
+- Provider-neutral interfaces are preserved where practical.
+- Reliability signals describe services and systems, never individuals.
 
-## License
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), follow the
+[Community Code of Conduct](CODE_OF_CONDUCT.md), and report vulnerabilities
+privately according to [SECURITY.md](SECURITY.md).
 
 Licensed under the [Apache License 2.0](LICENSE).

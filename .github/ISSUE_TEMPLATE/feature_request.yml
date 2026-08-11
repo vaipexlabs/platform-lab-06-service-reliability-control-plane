@@ -1,0 +1,27 @@
+name: Feature request
+description: Propose a focused improvement to the reliability control plane.
+title: "feature: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Which developer, operator, or platform problem should be solved?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe the observable behavior without prescribing unnecessary implementation detail.
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Compatibility and safety boundaries
+      description: Note contract, telemetry, policy, portability, security, or migration implications.
+    validations:
+      required: true
