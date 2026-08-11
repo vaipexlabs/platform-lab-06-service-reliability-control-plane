@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/blob/main/contracts/service-reliability.schema.json",
+  "title": "Vaipex Service Reliability Contract",
+  "description": "A versioned declaration of service ownership, reliability objectives, error-budget policy, and delivery decision policy.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {
+      "const": "reliability.vaipex.io/v1alpha1"
+    },
+    "kind": {
+      "const": "ServiceReliability"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "spec": {
+      "$ref": "#/$defs/spec"
+    }
+  },
+  "$defs": {
+    "duration": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*(s|m|h|d)$",
+      "description": "A positive duration expressed as seconds, minutes, hours, or days."
+    },
+    "dnsLabel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 63,
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/dnsLabel"
+        },
+        "labels": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9]([A-Za-z0-9_.-]*[A-Za-z0-9])?$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 63
+          }
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["service", "evaluation", "objectives", "decisionPolicy"],
+      "properties": {
+        "service": {
+          "$ref": "#/$defs/service"
+        },
+        "evaluation": {
+          "$ref": "#/$defs/evaluation"
+        },
+        "objectives": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/objective"
+          }
+        },
+        "decisionPolicy": {
+          "$ref": "#/$defs/decisionPolicy"
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["displayName", "owner", "tier", "repository", "runbook"],
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "owner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["team", "contact"],
+          "properties": {
+            "team": {
+              "$ref": "#/$defs/dnsLabel"
+            },
+            "contact": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 200,
+              "description": "A resolvable team contact such as an email address or chat handle."
+            }
+          }
+        },
+        "tier": {
+          "type": "string",
+          "enum": ["tier-1", "tier-2", "tier-3", "tier-4"]
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri"
+        },
+        "runbook": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["interval", "dataFreshness"],
+      "properties": {
+        "interval": {
+          "$ref": "#/$defs/duration"
+        },
+        "dataFreshness": {
+          "$ref": "#/$defs/duration"
+        }
+      }
+    },
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "displayName", "description", "indicator", "target", "window", "burnRateAlerts"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/dnsLabel"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "indicator": {
+          "$ref": "#/$defs/indicator"
+        },
+        "target": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100,
+          "description": "Required percentage of good events in the objective window."
+        },
+        "window": {
+          "$ref": "#/$defs/duration"
+        },
+        "minimumTotalEvents": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Optional minimum sample count below which the objective is unknown."
+        },
+        "burnRateAlerts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/burnRateAlert"
+          }
+        }
+      }
+    },
+    "indicator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "provider", "queryLanguage", "goodEventsQuery", "totalEventsQuery"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": ["availability", "latency", "correctness", "quality", "custom"]
+        },
+        "provider": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "description": "Telemetry adapter responsible for executing the indicator queries."
+        },
+        "queryLanguage": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "goodEventsQuery": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "totalEventsQuery": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        }
+      }
+    },
+    "burnRateAlert": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "severity", "shortWindow", "longWindow", "threshold"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/dnsLabel"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["page", "ticket"]
+        },
+        "shortWindow": {
+          "$ref": "#/$defs/duration"
+        },
+        "longWindow": {
+          "$ref": "#/$defs/duration"
+        },
+        "threshold": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "decisionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["caution", "pause"],
+      "properties": {
+        "caution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["remainingBudgetBelowPercent"],
+          "properties": {
+            "remainingBudgetBelowPercent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          }
+        },
+        "pause": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["remainingBudgetAtOrBelowPercent", "activeBurnRateSeverities"],
+          "properties": {
+            "remainingBudgetAtOrBelowPercent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "activeBurnRateSeverities": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": ["page", "ticket"]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

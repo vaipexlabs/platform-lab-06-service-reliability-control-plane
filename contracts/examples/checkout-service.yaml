@@ -1,0 +1,78 @@
+apiVersion: reliability.vaipex.io/v1alpha1
+kind: ServiceReliability
+metadata:
+  name: checkout-service
+  labels:
+    domain: commerce
+    environment: production
+spec:
+  service:
+    displayName: Checkout Service
+    owner:
+      team: checkout-platform
+      contact: checkout-platform@example.com
+    tier: tier-1
+    repository: https://github.com/example-org/checkout-service
+    runbook: https://github.com/example-org/checkout-service/blob/main/docs/runbook.md
+  evaluation:
+    interval: 1m
+    dataFreshness: 10m
+  objectives:
+    - id: request-availability
+      displayName: Request availability
+      description: Successful checkout requests as a percentage of all valid checkout requests.
+      indicator:
+        category: availability
+        provider: prometheus
+        queryLanguage: promql
+        goodEventsQuery: |
+          sum(rate(http_server_request_duration_seconds_count{service="checkout-service",http_response_status_code!~"5.."}[5m]))
+        totalEventsQuery: |
+          sum(rate(http_server_request_duration_seconds_count{service="checkout-service"}[5m]))
+      target: 99.9
+      window: 30d
+      minimumTotalEvents: 1000
+      burnRateAlerts:
+        - name: fast-burn
+          severity: page
+          shortWindow: 5m
+          longWindow: 1h
+          threshold: 14.4
+        - name: slow-burn
+          severity: ticket
+          shortWindow: 30m
+          longWindow: 6h
+          threshold: 6
+    - id: request-latency
+      displayName: Request latency
+      description: Checkout requests completed within 500 milliseconds as a percentage of all checkout requests.
+      indicator:
+        category: latency
+        provider: prometheus
+        queryLanguage: promql
+        goodEventsQuery: |
+          sum(rate(http_server_request_duration_seconds_bucket{service="checkout-service",le="0.5"}[5m]))
+        totalEventsQuery: |
+          sum(rate(http_server_request_duration_seconds_count{service="checkout-service"}[5m]))
+      target: 99
+      window: 30d
+      minimumTotalEvents: 1000
+      burnRateAlerts:
+        - name: fast-burn
+          severity: page
+          shortWindow: 5m
+          longWindow: 1h
+          threshold: 14.4
+        - name: slow-burn
+          severity: ticket
+          shortWindow: 30m
+          longWindow: 6h
+          threshold: 6
+  decisionPolicy:
+    caution:
+      remainingBudgetBelowPercent: 25
+    pause:
+      remainingBudgetAtOrBelowPercent: 0
+      activeBurnRateSeverities:
+        - page
+

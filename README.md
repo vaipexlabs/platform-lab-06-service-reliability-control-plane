@@ -16,6 +16,7 @@ community.
 
 [Project at a Glance](#project-at-a-glance) ·
 [Reliability Model](#reliability-model) ·
+[Reliability Contract](#reliability-contract) ·
 [Delivery Flow](#delivery-flow) ·
 [Two-Minute Demo](#two-minute-demo) ·
 [Delivery Roadmap](#delivery-roadmap)
@@ -58,6 +59,21 @@ SLIs and SLOs are operational engineering tools. An SLA is a business or
 customer commitment and should normally be informed by—rather than used as a
 substitute for—the internal reliability model.
 
+## Reliability Contract
+
+Service teams declare reliability intent through a strict, versioned
+`ServiceReliability` document. The contract connects ownership and runbooks to
+availability and latency objectives, Prometheus-compatible evidence,
+multi-window burn-rate alerts, and explainable delivery policy thresholds.
+
+- Start with the [checkout-service example](contracts/examples/checkout-service.yaml).
+- Inspect the portable [JSON Schema](contracts/service-reliability.schema.json).
+- Read the [contract semantics and design boundaries](docs/reliability-contract.md).
+
+The interface is telemetry-adapter oriented. The reference implementation
+starts with Prometheus and PromQL while preserving a stable good-events /
+total-events model that another provider can implement.
+
 ## Delivery Flow
 
 ![Vaipex Service Reliability Control Plane flow](docs/images/vaipex-service-reliability-control-plane-flow.svg)
@@ -92,7 +108,7 @@ be added and verified through the milestones below.
 
 - [x] Establish the open-source repository, project narrative, reliability
   vocabulary, standard flow, and Apache 2.0 license.
-- [ ] Define a provider-neutral, versioned reliability contract for services,
+- [x] Define a provider-neutral, versioned reliability contract for services,
   SLIs, SLOs, ownership, and evaluation windows.
 - [ ] Build contract validation with clear feedback and representative valid
   and invalid examples.
@@ -136,4 +152,3 @@ only when their corresponding milestone delivers a working capability.
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
-
