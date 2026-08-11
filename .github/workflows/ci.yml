@@ -1,0 +1,76 @@
+name: Continuous Validation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: continuous-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Code and contract quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify formatting
+        shell: bash
+        run: |
+          unformatted="$(gofmt -l cmd internal)"
+          if [[ -n "${unformatted}" ]]; then
+            echo "The following Go files require gofmt:"
+            echo "${unformatted}"
+            exit 1
+          fi
+
+      - name: Run static analysis
+        run: go vet ./...
+
+      - name: Run race-enabled tests
+        run: go test -race ./...
+
+      - name: Validate reliability contracts
+        run: ./scripts/validate-contracts.sh
+
+      - name: Validate shell scripts
+        run: bash -n scripts/*.sh
+
+      - name: Validate dashboard JSON
+        run: python3 -m json.tool deploy/local/grafana/dashboards/service-reliability.json > /dev/null
+
+      - name: Validate Docker Compose configuration
+        run: docker compose -f deploy/local/compose.yaml config --quiet
+
+  end-to-end:
+    name: Two-minute reliability journey
+    needs: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run complete reliability journey
+        run: ./scripts/two-minute-demo.sh

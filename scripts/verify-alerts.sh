@@ -3,14 +3,18 @@
 set -euo pipefail
 
 prometheus_url="${PROMETHEUS_URL:-http://localhost:19090}"
-query='ALERTS{alertstate="firing",service="checkout-service"}'
 
 for _ in $(seq 1 75); do
-  response="$(curl --fail --silent --show-error --get \
-    "${prometheus_url}/api/v1/query" \
-    --data-urlencode "query=${query}")"
-  if [[ "${response}" == *"VaipexRequestAvailabilityFastBurn"* ]] \
-    && [[ "${response}" == *"VaipexRequestLatencyFastBurn"* ]]; then
+  availability_response="$(curl --fail --silent --show-error --get \
+    "${prometheus_url}/api/v1/rules" \
+    --data-urlencode "type=alert" \
+    --data-urlencode "rule_name[]=VaipexRequestAvailabilityFastBurn")"
+  latency_response="$(curl --fail --silent --show-error --get \
+    "${prometheus_url}/api/v1/rules" \
+    --data-urlencode "type=alert" \
+    --data-urlencode "rule_name[]=VaipexRequestLatencyFastBurn")"
+  if [[ "${availability_response}" == *'"state":"firing","name":"VaipexRequestAvailabilityFastBurn"'* ]] \
+    && [[ "${latency_response}" == *'"state":"firing","name":"VaipexRequestLatencyFastBurn"'* ]]; then
     echo "Verified firing fast-burn alerts for availability and latency."
     exit 0
   fi
@@ -18,5 +22,6 @@ for _ in $(seq 1 75); do
 done
 
 echo "Expected fast-burn alerts did not fire within 75 seconds." >&2
-echo "${response}" >&2
+echo "Availability rule: ${availability_response}" >&2
+echo "Latency rule: ${latency_response}" >&2
 exit 1

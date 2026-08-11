@@ -13,6 +13,7 @@ community.
 ![Grafana](https://img.shields.io/badge/Experience-Grafana-F46800?logo=grafana&logoColor=white)
 ![Open Source](https://img.shields.io/badge/Model-Open%20Source-16A085)
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
+![Continuous Validation](https://github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/actions/workflows/ci.yml/badge.svg)
 
 [Project at a Glance](#project-at-a-glance) ·
 [Reliability Model](#reliability-model) ·
@@ -244,16 +245,24 @@ semantics, and integration guidance.
 
 ## Two-Minute Demo
 
-The completed reference implementation will provide one command:
+Prerequisites: Docker Desktop, Go 1.26 or newer, and `curl`.
+
+Run the complete reliability journey with one command:
 
 ```bash
 ./scripts/two-minute-demo.sh
 ```
 
-The journey will create representative traffic, evaluate availability and
-latency objectives, show error-budget consumption, demonstrate a burn-rate
-alert, and return an explainable delivery recommendation. Each capability will
-be added and verified through the milestones below.
+The demo validates the contract, starts the complete local platform, proves
+healthy evidence produces `proceed`, generates a controlled breach, verifies
+availability and latency burn-rate alerts, and proves the resulting evidence
+produces `pause`. It prints the SLO calculations and decision reasons, then
+always removes the project containers and network.
+
+The alert stage may wait for the contract's one-minute evaluation interval.
+The same command runs in GitHub Actions after the fast code and contract quality
+gate. See [Continuous Validation](docs/continuous-validation.md) for the exact
+checks, stages, and security boundaries.
 
 ## Delivery Roadmap
 
@@ -267,7 +276,7 @@ be added and verified through the milestones below.
 - [x] Add reproducible service telemetry and Prometheus-based evidence.
 - [x] Add multi-window burn-rate alerts, dashboards, and linked runbooks.
 - [x] Add an explainable reliability decision interface for delivery systems.
-- [ ] Automate validation and the complete two-minute journey in CI.
+- [x] Automate validation and the complete two-minute journey in CI.
 - [ ] Polish security, operations, contribution, and adoption guidance.
 
 ## Planned Repository Map
