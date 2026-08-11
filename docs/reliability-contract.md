@@ -65,9 +65,12 @@ total-events interface.
 
 Both queries must use the same service, environment, and event population;
 must resolve to one numeric value; and must use compatible units. The platform
-validator will enforce supported provider/language pairs. The evaluator treats
-zero traffic, insufficient samples, stale telemetry, and query failure as
-`unknown`, never as a successful objective.
+validator enforces supported provider/language pairs. PromQL templates must
+include `$window`; the collector replaces it with the objective window before
+parsing and execution. This ensures the returned counts describe the same
+window used by the error-budget calculation. The evaluator treats zero
+traffic, insufficient samples, stale telemetry, and query failure as `unknown`,
+never as a successful objective.
 
 ## Objective and Error-Budget Semantics
 

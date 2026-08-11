@@ -122,6 +122,28 @@ zero-traffic, and insufficient-sample inputs never become false success. See
 [SLO Evaluation and Error Budgets](docs/evaluation-engine.md) for the formulas,
 evidence rules, and deterministic fixtures.
 
+### Evaluate live Prometheus evidence
+
+Prerequisites: Docker Desktop, Go 1.26 or newer, and `curl`.
+
+```bash
+./scripts/start-local.sh
+./scripts/generate-traffic.sh
+./scripts/evaluate-live.sh
+./scripts/stop-local.sh
+```
+
+The local platform runs an instrumented checkout service on
+`http://localhost:18080` and Prometheus on `http://localhost:19090`. The
+default traffic produces 99.95% availability and 99.5% latency attainment,
+with both objectives reporting a `0.5` burn rate and 50% budget remaining.
+
+`reliabilityctl collect` renders the contract's window-aware PromQL, queries
+Prometheus, and writes a portable evidence snapshot. The unchanged evaluation
+engine then calculates the reliability result. See [Live Prometheus
+Evidence](docs/live-prometheus.md) for the component boundaries, manual
+commands, failure behavior, traffic overrides, and cleanup.
+
 ## Delivery Flow
 
 ![Vaipex Service Reliability Control Plane flow](docs/images/vaipex-service-reliability-control-plane-flow.svg)
@@ -161,7 +183,7 @@ be added and verified through the milestones below.
 - [x] Build contract validation with clear feedback and representative valid
   and invalid examples.
 - [x] Implement the SLO evaluator and error-budget calculation engine.
-- [ ] Add reproducible service telemetry and Prometheus-based evidence.
+- [x] Add reproducible service telemetry and Prometheus-based evidence.
 - [ ] Add multi-window burn-rate alerts, dashboards, and linked runbooks.
 - [ ] Add an explainable reliability decision interface for delivery systems.
 - [ ] Automate validation and the complete two-minute journey in CI.

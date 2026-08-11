@@ -1,0 +1,9 @@
+.git
+.github
+.DS_Store
+bin
+build
+coverage
+data
+tmp
+

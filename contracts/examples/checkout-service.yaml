@@ -26,9 +26,9 @@ spec:
         provider: prometheus
         queryLanguage: promql
         goodEventsQuery: |
-          sum(rate(http_server_request_duration_seconds_count{service="checkout-service",http_response_status_code!~"5.."}[5m]))
+          sum(increase(vaipex_checkout_requests_total{service="checkout-service",status!="error"}[$window]))
         totalEventsQuery: |
-          sum(rate(http_server_request_duration_seconds_count{service="checkout-service"}[5m]))
+          sum(increase(vaipex_checkout_requests_total{service="checkout-service"}[$window]))
       target: 99.9
       window: 30d
       minimumTotalEvents: 1000
@@ -51,9 +51,9 @@ spec:
         provider: prometheus
         queryLanguage: promql
         goodEventsQuery: |
-          sum(rate(http_server_request_duration_seconds_bucket{service="checkout-service",le="0.5"}[5m]))
+          sum(increase(vaipex_checkout_request_duration_seconds_bucket{service="checkout-service",le="0.5"}[$window]))
         totalEventsQuery: |
-          sum(rate(http_server_request_duration_seconds_count{service="checkout-service"}[5m]))
+          sum(increase(vaipex_checkout_request_duration_seconds_count{service="checkout-service"}[$window]))
       target: 99
       window: 30d
       minimumTotalEvents: 1000
@@ -75,4 +75,3 @@ spec:
       remainingBudgetAtOrBelowPercent: 0
       activeBurnRateSeverities:
         - page
-

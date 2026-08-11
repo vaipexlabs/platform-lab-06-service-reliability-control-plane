@@ -255,7 +255,11 @@ func validateSemantics(contract *ServiceReliability) []Problem {
 }
 
 func validatePromQL(path, query string) []Problem {
-	expression, err := parser.NewParser(parser.Options{}).ParseExpr(strings.TrimSpace(query))
+	if !strings.Contains(query, "$window") {
+		return []Problem{{Path: path, Message: "invalid PromQL template: query must include the $window placeholder"}}
+	}
+	parseable := strings.ReplaceAll(query, "$window", "5m")
+	expression, err := parser.NewParser(parser.Options{}).ParseExpr(strings.TrimSpace(parseable))
 	if err != nil {
 		return []Problem{{Path: path, Message: fmt.Sprintf("invalid PromQL: %v", err)}}
 	}
