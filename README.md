@@ -164,6 +164,8 @@ rather than relying on separately maintained definitions. The dashboard shows
 SLO attainment, budget remaining, burn rate, active alerts, request outcomes,
 and evaluation windows.
 
+![Vaipex Service Reliability dashboard showing an active error-budget breach](docs/images/vaipex-service-reliability-dashboard.png)
+
 ```bash
 ./scripts/generate-breach.sh
 ./scripts/verify-alerts.sh
