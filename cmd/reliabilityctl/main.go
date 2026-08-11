@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/internal/contract"
+	"github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/internal/decision"
 	"github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/internal/evaluation"
 	prometheusrules "github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/internal/rules"
 	"github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/internal/telemetry"
@@ -33,6 +34,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return runCollect(args[1:], stdout, stderr)
 	case "render-rules":
 		return runRenderRules(args[1:], stdout, stderr)
+	case "decide":
+		return runDecide(args[1:], stdout, stderr)
 	default:
 		printUsage(stderr)
 		return 2
@@ -220,6 +223,60 @@ func runRenderRules(args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
+func runDecide(args []string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("decide", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	contractPath := flags.String("contract", "", "path to a ServiceReliability YAML or JSON document")
+	evidencePath := flags.String("evidence", "", "path to a ReliabilityEvidence YAML or JSON document")
+	var activeSeverities stringValues
+	flags.Var(&activeSeverities, "active-severity", "active burn-rate severity; repeat for multiple values")
+	if err := flags.Parse(args); err != nil {
+		return 2
+	}
+	if *contractPath == "" || *evidencePath == "" || flags.NArg() != 0 {
+		printUsage(stderr)
+		return 2
+	}
+
+	validator, err := contract.NewValidator()
+	if err != nil {
+		fmt.Fprintf(stderr, "initialize contract validator: %v\n", err)
+		return 2
+	}
+	reliability, err := validator.ValidateFile(*contractPath)
+	if err != nil {
+		fmt.Fprintf(stderr, "invalid contract: %s\n%v\n", *contractPath, err)
+		return 1
+	}
+	engine, err := evaluation.NewEngine()
+	if err != nil {
+		fmt.Fprintf(stderr, "initialize evaluation engine: %v\n", err)
+		return 2
+	}
+	evaluationResult, err := engine.EvaluateFile(reliability, *evidencePath)
+	if err != nil {
+		fmt.Fprintf(stderr, "invalid evidence: %s\n%v\n", *evidencePath, err)
+		return 1
+	}
+	result := decision.Decide(reliability, evaluationResult, activeSeverities)
+	if err := encodeJSON(stdout, result); err != nil {
+		fmt.Fprintf(stderr, "encode decision: %v\n", err)
+		return 2
+	}
+	return 0
+}
+
+type stringValues []string
+
+func (values *stringValues) String() string {
+	return fmt.Sprint([]string(*values))
+}
+
+func (values *stringValues) Set(value string) error {
+	*values = append(*values, value)
+	return nil
+}
+
 func encodeJSON(writer io.Writer, value any) error {
 	encoder := json.NewEncoder(writer)
 	encoder.SetIndent("", "  ")
@@ -233,4 +290,5 @@ func printUsage(writer io.Writer) {
 	fmt.Fprintln(writer, "  reliabilityctl evaluate --contract <path> --evidence <path>")
 	fmt.Fprintln(writer, "  reliabilityctl collect --contract <path> [--prometheus-url <url>] [--output <path>]")
 	fmt.Fprintln(writer, "  reliabilityctl render-rules --contract <path> [--output <path>]")
+	fmt.Fprintln(writer, "  reliabilityctl decide --contract <path> --evidence <path> [--active-severity <severity>]")
 }

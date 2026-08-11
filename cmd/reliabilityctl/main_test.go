@@ -44,6 +44,57 @@ func TestRunEvaluate(t *testing.T) {
 	}
 }
 
+func TestRunDecide(t *testing.T) {
+	t.Parallel()
+
+	contractPath := filepath.Join("..", "..", "contracts", "examples", "checkout-service.yaml")
+	tests := []struct {
+		name     string
+		evidence string
+		extra    []string
+		want     string
+	}{
+		{
+			name:     "proceed",
+			evidence: filepath.Join("..", "..", "contracts", "examples", "checkout-service-evidence.yaml"),
+			want:     `"recommendation": "proceed"`,
+		},
+		{
+			name:     "caution",
+			evidence: filepath.Join("..", "..", "testdata", "evidence", "degraded.yaml"),
+			want:     `"recommendation": "caution"`,
+		},
+		{
+			name:     "pause",
+			evidence: filepath.Join("..", "..", "testdata", "evidence", "exhausted.yaml"),
+			want:     `"recommendation": "pause"`,
+		},
+		{
+			name:     "active severity pauses a healthy evaluation",
+			evidence: filepath.Join("..", "..", "contracts", "examples", "checkout-service-evidence.yaml"),
+			extra:    []string{"--active-severity", "page"},
+			want:     `"recommendation": "pause"`,
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			var stdout bytes.Buffer
+			var stderr bytes.Buffer
+			args := []string{"decide", "--contract", contractPath, "--evidence", test.evidence}
+			args = append(args, test.extra...)
+			if code := run(args, &stdout, &stderr); code != 0 {
+				t.Fatalf("run() code = %d, want 0; stderr = %s", code, stderr.String())
+			}
+			if !strings.Contains(stdout.String(), test.want) {
+				t.Fatalf("stdout does not contain %q: %s", test.want, stdout.String())
+			}
+		})
+	}
+}
+
 func TestRunInvalidContract(t *testing.T) {
 	t.Parallel()
 

@@ -20,6 +20,7 @@ community.
 [Delivery Flow](#delivery-flow) ·
 [Two-Minute Demo](#two-minute-demo) ·
 [Dashboard and Alerts](#dashboard-and-alerts) ·
+[Decision Interface](#decision-interface) ·
 [Delivery Roadmap](#delivery-roadmap)
 
 ## Project at a Glance
@@ -185,6 +186,45 @@ See [Dashboards, Alerts, and Runbooks](docs/dashboards-and-alerts.md) for the
 rule-generation flow, alert thresholds, verification commands, and response
 model.
 
+## Decision Interface
+
+`reliabilityctl decide` turns the validated contract and the same deterministic
+evidence used by the evaluator into a machine-readable delivery
+recommendation:
+
+```bash
+go run ./cmd/reliabilityctl decide \
+  --contract contracts/examples/checkout-service.yaml \
+  --evidence contracts/examples/checkout-service-evidence.yaml
+```
+
+The healthy example returns `proceed`. Explore the remaining policy outcomes:
+
+```bash
+# Low remaining budget returns caution.
+go run ./cmd/reliabilityctl decide \
+  --contract contracts/examples/checkout-service.yaml \
+  --evidence testdata/evidence/degraded.yaml
+
+# Exhausted budget returns pause.
+go run ./cmd/reliabilityctl decide \
+  --contract contracts/examples/checkout-service.yaml \
+  --evidence testdata/evidence/exhausted.yaml
+
+# An active configured severity can independently return pause.
+go run ./cmd/reliabilityctl decide \
+  --contract contracts/examples/checkout-service.yaml \
+  --evidence contracts/examples/checkout-service-evidence.yaml \
+  --active-severity page
+```
+
+Every result includes the recommendation, active severities, policy thresholds,
+and structured reason codes with the values that triggered them. Valid
+recommendations exit successfully because this interface is advisory; a
+delivery system chooses whether and how to enforce the result. See the
+[Decision Interface](docs/decision-interface.md) for precedence, output
+semantics, and integration guidance.
+
 ## Delivery Flow
 
 ![Vaipex Service Reliability Control Plane flow](docs/images/vaipex-service-reliability-control-plane-flow.svg)
@@ -195,7 +235,7 @@ model.
 3. Prometheus-compatible telemetry supplies request and latency evidence.
 4. The reliability engine evaluates objective attainment, remaining error
    budget, and burn rate from the same transparent definitions.
-5. Dashboards, alerts, and a decision API expose both the outcome and its
+5. Dashboards, alerts, and a decision interface expose both the outcome and its
    supporting evidence.
 6. Delivery workflows use that evidence to proceed, exercise caution, or pause
    while teams restore reliability.
@@ -226,7 +266,7 @@ be added and verified through the milestones below.
 - [x] Implement the SLO evaluator and error-budget calculation engine.
 - [x] Add reproducible service telemetry and Prometheus-based evidence.
 - [x] Add multi-window burn-rate alerts, dashboards, and linked runbooks.
-- [ ] Add an explainable reliability decision interface for delivery systems.
+- [x] Add an explainable reliability decision interface for delivery systems.
 - [ ] Automate validation and the complete two-minute journey in CI.
 - [ ] Polish security, operations, contribution, and adoption guidance.
 
