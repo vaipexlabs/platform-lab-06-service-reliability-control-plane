@@ -15,8 +15,18 @@ read_request_counter() {
     | sed -n 's/.*"value":\[[^,]*,"\([^"]*\)"\].*/\1/p'
 }
 
-baseline="$(read_request_counter)"
-baseline="${baseline:-0}"
+baseline=""
+for _ in $(seq 1 30); do
+  baseline="$(read_request_counter)"
+  if [[ -n "${baseline}" ]]; then
+    break
+  fi
+  sleep 1
+done
+if [[ -z "${baseline}" ]]; then
+  echo "Prometheus did not establish a request-counter baseline within 30 seconds." >&2
+  exit 1
+fi
 target="$(awk -v current="${baseline}" -v amount="${requests}" \
   'BEGIN { printf "%.9f", current + amount }')"
 
