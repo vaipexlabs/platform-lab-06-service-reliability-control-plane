@@ -19,6 +19,7 @@ community.
 [Reliability Contract](#reliability-contract) ·
 [Delivery Flow](#delivery-flow) ·
 [Two-Minute Demo](#two-minute-demo) ·
+[Dashboard and Alerts](#dashboard-and-alerts) ·
 [Delivery Roadmap](#delivery-roadmap)
 
 ## Project at a Glance
@@ -144,6 +145,46 @@ engine then calculates the reliability result. See [Live Prometheus
 Evidence](docs/live-prometheus.md) for the component boundaries, manual
 commands, failure behavior, traffic overrides, and cleanup.
 
+## Dashboard and Alerts
+
+The reliability contract is also the source for generated Prometheus
+recording rules and multi-window burn-rate alerts. This keeps the dashboard,
+alerts, evaluator, and service objectives aligned instead of maintaining
+parallel definitions by hand.
+
+Start the platform and generate healthy traffic:
+
+```bash
+./scripts/start-local.sh
+./scripts/generate-traffic.sh
+```
+
+Open the provisioned Grafana dashboard at
+`http://localhost:13000/d/vaipex-service-reliability`. It shows SLO
+attainment, remaining error budget, current burn rate, active alerts, request
+outcomes, and each evaluation window.
+
+Generate a deterministic reliability breach and verify the alerts:
+
+```bash
+./scripts/generate-breach.sh
+./scripts/verify-alerts.sh
+./scripts/evaluate-live.sh
+```
+
+The verifier allows for the contract's one-minute rule evaluation interval.
+Fast-burn alerts use paired 5-minute and 1-hour windows; slow-burn alerts use
+paired 30-minute and 6-hour windows. Every generated alert links to the
+appropriate response runbook. Stop and remove the local stack when finished:
+
+```bash
+./scripts/stop-local.sh
+```
+
+See [Dashboards, Alerts, and Runbooks](docs/dashboards-and-alerts.md) for the
+rule-generation flow, alert thresholds, verification commands, and response
+model.
+
 ## Delivery Flow
 
 ![Vaipex Service Reliability Control Plane flow](docs/images/vaipex-service-reliability-control-plane-flow.svg)
@@ -184,7 +225,7 @@ be added and verified through the milestones below.
   and invalid examples.
 - [x] Implement the SLO evaluator and error-budget calculation engine.
 - [x] Add reproducible service telemetry and Prometheus-based evidence.
-- [ ] Add multi-window burn-rate alerts, dashboards, and linked runbooks.
+- [x] Add multi-window burn-rate alerts, dashboards, and linked runbooks.
 - [ ] Add an explainable reliability decision interface for delivery systems.
 - [ ] Automate validation and the complete two-minute journey in CI.
 - [ ] Polish security, operations, contribution, and adoption guidance.

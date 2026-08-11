@@ -11,6 +11,7 @@ import (
 
 	"github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/internal/contract"
 	"github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/internal/evaluation"
+	prometheusrules "github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/internal/rules"
 	"github.com/vaipexlabs/platform-lab-06-service-reliability-control-plane/internal/telemetry"
 )
 
@@ -30,6 +31,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return runEvaluate(args[1:], stdout, stderr)
 	case "collect":
 		return runCollect(args[1:], stdout, stderr)
+	case "render-rules":
+		return runRenderRules(args[1:], stdout, stderr)
 	default:
 		printUsage(stderr)
 		return 2
@@ -178,6 +181,45 @@ func runCollect(args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
+func runRenderRules(args []string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("render-rules", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	contractPath := flags.String("contract", "", "path to a ServiceReliability YAML or JSON document")
+	outputPath := flags.String("output", "-", "Prometheus rules output path, or - for stdout")
+	if err := flags.Parse(args); err != nil {
+		return 2
+	}
+	if *contractPath == "" || flags.NArg() != 0 {
+		printUsage(stderr)
+		return 2
+	}
+	validator, err := contract.NewValidator()
+	if err != nil {
+		fmt.Fprintf(stderr, "initialize contract validator: %v\n", err)
+		return 2
+	}
+	reliability, err := validator.ValidateFile(*contractPath)
+	if err != nil {
+		fmt.Fprintf(stderr, "invalid contract: %s\n%v\n", *contractPath, err)
+		return 1
+	}
+	data, err := prometheusrules.Generate(reliability)
+	if err != nil {
+		fmt.Fprintf(stderr, "render Prometheus rules: %v\n", err)
+		return 1
+	}
+	if *outputPath == "-" {
+		_, _ = stdout.Write(data)
+		return 0
+	}
+	if err := os.WriteFile(*outputPath, data, 0o644); err != nil {
+		fmt.Fprintf(stderr, "write Prometheus rules: %v\n", err)
+		return 2
+	}
+	fmt.Fprintf(stdout, "wrote Prometheus rules: %s\n", *outputPath)
+	return 0
+}
+
 func encodeJSON(writer io.Writer, value any) error {
 	encoder := json.NewEncoder(writer)
 	encoder.SetIndent("", "  ")
@@ -190,4 +232,5 @@ func printUsage(writer io.Writer) {
 	fmt.Fprintln(writer, "  reliabilityctl validate <contract.yaml|contract.json>")
 	fmt.Fprintln(writer, "  reliabilityctl evaluate --contract <path> --evidence <path>")
 	fmt.Fprintln(writer, "  reliabilityctl collect --contract <path> [--prometheus-url <url>] [--output <path>]")
+	fmt.Fprintln(writer, "  reliabilityctl render-rules --contract <path> [--output <path>]")
 }

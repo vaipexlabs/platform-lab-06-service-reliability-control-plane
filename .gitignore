@@ -12,6 +12,7 @@
 .env.*
 !.env.example
 *.local
+.local/
 
 # Dependencies and generated output
 node_modules/
@@ -35,4 +36,3 @@ data/
 .terraform/
 *.tfstate
 *.tfstate.*
-
