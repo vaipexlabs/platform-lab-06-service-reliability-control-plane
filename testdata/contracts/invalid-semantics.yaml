@@ -1,0 +1,64 @@
+apiVersion: reliability.vaipex.io/v1alpha1
+kind: ServiceReliability
+metadata:
+  name: checkout-service
+spec:
+  service:
+    displayName: Checkout Service
+    owner:
+      team: checkout-platform
+      contact: checkout-platform@example.com
+    tier: tier-1
+    repository: https://github.com/example-org/checkout-service
+    runbook: https://github.com/example-org/checkout-service/blob/main/docs/runbook.md
+  evaluation:
+    interval: 5m
+    dataFreshness: 10m
+  objectives:
+    - id: request-health
+      displayName: Request availability
+      description: Invalid PromQL and alert relationships demonstrate semantic feedback.
+      indicator:
+        category: availability
+        provider: prometheus
+        queryLanguage: promql
+        goodEventsQuery: sum(rate(good_total[5m])
+        totalEventsQuery: sum(rate(total_total[5m]))
+      target: 99.9
+      window: 30d
+      burnRateAlerts:
+        - name: fast-burn
+          severity: page
+          shortWindow: 5m
+          longWindow: 1m
+          threshold: 14.4
+        - name: fast-burn
+          severity: ticket
+          shortWindow: 30m
+          longWindow: 6h
+          threshold: 6
+    - id: request-health
+      displayName: Request quality
+      description: Unsupported telemetry adapters are rejected until explicitly implemented.
+      indicator:
+        category: quality
+        provider: example-monitor
+        queryLanguage: example-query
+        goodEventsQuery: good events
+        totalEventsQuery: all events
+      target: 99
+      window: 30d
+      burnRateAlerts:
+        - name: slow-burn
+          severity: ticket
+          shortWindow: 30m
+          longWindow: 6h
+          threshold: 6
+  decisionPolicy:
+    caution:
+      remainingBudgetBelowPercent: 25
+    pause:
+      remainingBudgetAtOrBelowPercent: 50
+      activeBurnRateSeverities:
+        - page
+

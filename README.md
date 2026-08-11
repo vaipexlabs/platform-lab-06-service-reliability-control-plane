@@ -74,6 +74,33 @@ The interface is telemetry-adapter oriented. The reference implementation
 starts with Prometheus and PromQL while preserving a stable good-events /
 total-events model that another provider can implement.
 
+### Validate a contract
+
+Run the validator directly:
+
+```bash
+go run ./cmd/reliabilityctl validate contracts/examples/checkout-service.yaml
+```
+
+Expected result:
+
+```text
+valid: contracts/examples/checkout-service.yaml (service=checkout-service objectives=2)
+```
+
+Or run the complete contract gate, which also proves that representative
+structural and semantic failures are rejected:
+
+```bash
+./scripts/validate-contracts.sh
+```
+
+The validator accepts YAML or JSON, uses the embedded canonical schema, checks
+URI formats, and then applies rules that JSON Schema cannot express clearly:
+unique identifiers, duration ordering, supported telemetry adapters, PromQL
+syntax, and consistent delivery thresholds. Failures identify the exact field
+path and return a non-zero exit code suitable for local hooks or CI.
+
 ## Delivery Flow
 
 ![Vaipex Service Reliability Control Plane flow](docs/images/vaipex-service-reliability-control-plane-flow.svg)
@@ -110,7 +137,7 @@ be added and verified through the milestones below.
   vocabulary, standard flow, and Apache 2.0 license.
 - [x] Define a provider-neutral, versioned reliability contract for services,
   SLIs, SLOs, ownership, and evaluation windows.
-- [ ] Build contract validation with clear feedback and representative valid
+- [x] Build contract validation with clear feedback and representative valid
   and invalid examples.
 - [ ] Implement the SLO evaluator and error-budget calculation engine.
 - [ ] Add reproducible service telemetry and Prometheus-based evidence.

@@ -1,0 +1,41 @@
+apiVersion: reliability.vaipex.io/v1alpha1
+kind: ServiceReliability
+metadata:
+  name: checkout-service
+spec:
+  service:
+    displayName: Checkout Service
+    owner:
+      team: checkout-platform
+      contact: checkout-platform@example.com
+    tier: tier-1
+    repository: https://github.com/example-org/checkout-service
+  evaluation:
+    interval: 1m
+    dataFreshness: 10m
+  objectives:
+    - id: request-availability
+      displayName: Request availability
+      description: Invalid target demonstrates field-level schema feedback.
+      indicator:
+        category: availability
+        provider: prometheus
+        queryLanguage: promql
+        goodEventsQuery: sum(rate(good_total[5m]))
+        totalEventsQuery: sum(rate(total_total[5m]))
+      target: 101
+      window: 30d
+      burnRateAlerts:
+        - name: fast-burn
+          severity: page
+          shortWindow: 5m
+          longWindow: 1h
+          threshold: 14.4
+  decisionPolicy:
+    caution:
+      remainingBudgetBelowPercent: 25
+    pause:
+      remainingBudgetAtOrBelowPercent: 0
+      activeBurnRateSeverities:
+        - page
+
