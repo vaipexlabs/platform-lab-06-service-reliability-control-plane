@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Vaipex Service Reliability Control Plane flow</title>
+  <desc id="desc">Service reliability contracts and telemetry flow through validation and objective evaluation to error-budget evidence, operational actions, and continuous improvement.</desc>
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1677ff"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fbff"/>
+      <stop offset="1" stop-color="#f6f2ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#152252" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#175ec8"/>
+    </marker>
+    <style>
+      .ink{fill:#07164f}.muted{fill:#53617f}.label{font:700 15px Arial,sans-serif;letter-spacing:1.1px}.title{font:800 42px Arial,sans-serif;letter-spacing:.7px}.cardtitle{font:700 21px Arial,sans-serif}.body{font:16px Arial,sans-serif}.small{font:14px Arial,sans-serif}.line{stroke:#175ec8;stroke-width:4;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <circle cx="1370" cy="80" r="220" fill="#f4efff" opacity="0.75"/>
+  <circle cx="150" cy="790" r="240" fill="#edf6ff" opacity="0.85"/>
+
+  <g transform="translate(584 30)">
+    <path d="M0 0h36l24 43L43 72z" fill="#2877ff"/>
+    <path d="M72 0h36L66 72H43z" fill="#6d42e8"/>
+    <text x="135" y="55" class="ink" style="font:800 38px Arial,sans-serif;letter-spacing:4px">VAIPEX LABS</text>
+  </g>
+  <text x="800" y="145" text-anchor="middle" class="title ink">SERVICE RELIABILITY CONTROL PLANE</text>
+  <path d="M70 171H350" stroke="url(#brand)" stroke-width="3"/>
+  <path d="M1250 171H1530" stroke="url(#brand)" stroke-width="3"/>
+
+  <g transform="translate(50 230)" filter="url(#shadow)">
+    <rect width="250" height="390" rx="22" fill="url(#panel)" stroke="#2877ff" stroke-width="2"/>
+    <text x="125" y="42" text-anchor="middle" class="label ink">SERVICE INTENT</text>
+    <g transform="translate(22 72)"><rect width="206" height="78" rx="15" fill="#fff" stroke="#d7ddea"/><circle cx="38" cy="39" r="18" fill="#1677ff"/><path d="M30 39l6 6 11-14" stroke="#fff" stroke-width="3" fill="none"/><text x="70" y="34" class="cardtitle ink">SLIs</text><text x="70" y="57" class="small muted">measured behavior</text></g>
+    <g transform="translate(22 164)"><rect width="206" height="78" rx="15" fill="#fff" stroke="#d7ddea"/><circle cx="38" cy="39" r="18" fill="#6d42e8"/><circle cx="38" cy="39" r="10" fill="none" stroke="#fff" stroke-width="3"/><circle cx="38" cy="39" r="3" fill="#fff"/><text x="70" y="34" class="cardtitle ink">SLOs</text><text x="70" y="57" class="small muted">targets &amp; windows</text></g>
+    <g transform="translate(22 256)"><rect width="206" height="78" rx="15" fill="#fff" stroke="#d7ddea"/><circle cx="38" cy="39" r="18" fill="#16a085"/><path d="M29 47V34l9-7 9 7v13z" stroke="#fff" stroke-width="3" fill="none"/><text x="70" y="34" class="cardtitle ink">Ownership</text><text x="70" y="57" class="small muted">team &amp; runbook</text></g>
+  </g>
+
+  <path d="M300 425H350" class="line"/>
+  <g transform="translate(355 280)" filter="url(#shadow)">
+    <rect width="220" height="290" rx="22" fill="#fff" stroke="#2877ff" stroke-width="2"/>
+    <circle cx="110" cy="78" r="46" fill="#edf5ff" stroke="#2877ff" stroke-width="3"/>
+    <path d="M80 78l18 18 42-48" stroke="#2877ff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="110" y="154" text-anchor="middle" class="cardtitle ink">Contract Gate</text>
+    <text x="110" y="192" text-anchor="middle" class="body muted">Validate schema</text>
+    <text x="110" y="220" text-anchor="middle" class="body muted">Check semantics</text>
+    <text x="110" y="248" text-anchor="middle" class="body muted">Activate safely</text>
+  </g>
+
+  <path d="M575 425H625" class="line"/>
+  <g transform="translate(630 230)" filter="url(#shadow)">
+    <rect width="340" height="390" rx="22" fill="url(#panel)" stroke="#6d42e8" stroke-width="2"/>
+    <text x="170" y="42" text-anchor="middle" class="label ink">RELIABILITY ENGINE</text>
+    <g transform="translate(26 70)"><rect width="288" height="70" rx="15" fill="#fff" stroke="#d7ddea"/><path d="M25 50l18-18 14 10 21-24" stroke="#1677ff" stroke-width="5" fill="none"/><text x="102" y="31" class="cardtitle ink">Telemetry</text><text x="102" y="54" class="small muted">Prometheus evidence</text></g>
+    <g transform="translate(26 154)"><rect width="288" height="70" rx="15" fill="#fff" stroke="#d7ddea"/><circle cx="53" cy="35" r="22" fill="none" stroke="#6d42e8" stroke-width="5"/><path d="M53 35V20M53 35l13 8" stroke="#6d42e8" stroke-width="4"/><text x="102" y="31" class="cardtitle ink">Evaluate</text><text x="102" y="54" class="small muted">attainment by window</text></g>
+    <g transform="translate(26 238)"><rect width="288" height="70" rx="15" fill="#fff" stroke="#d7ddea"/><rect x="29" y="22" width="50" height="26" rx="13" fill="#e5e7eb"/><rect x="29" y="22" width="31" height="26" rx="13" fill="#16a085"/><text x="102" y="31" class="cardtitle ink">Error Budget</text><text x="102" y="54" class="small muted">remaining &amp; burn rate</text></g>
+  </g>
+
+  <path d="M970 425H1020" class="line"/>
+  <g transform="translate(1025 230)" filter="url(#shadow)">
+    <rect width="275" height="390" rx="22" fill="url(#panel)" stroke="#7c3aed" stroke-width="2"/>
+    <text x="137" y="42" text-anchor="middle" class="label ink">DECISION EXPERIENCE</text>
+    <g transform="translate(20 72)"><rect width="235" height="78" rx="15" fill="#fff" stroke="#d7ddea"/><path d="M26 54V29M43 54V20M60 54V39M77 54V27" stroke="#1677ff" stroke-width="7"/><text x="100" y="34" class="cardtitle ink">Dashboard</text><text x="100" y="57" class="small muted">objective health</text></g>
+    <g transform="translate(20 164)"><rect width="235" height="78" rx="15" fill="#fff" stroke="#d7ddea"/><path d="M50 19l25 43H25z" fill="#f59e0b"/><text x="50" y="52" text-anchor="middle" style="font:700 24px Arial,sans-serif;fill:#fff">!</text><text x="100" y="34" class="cardtitle ink">Alerts</text><text x="100" y="57" class="small muted">multi-window burn</text></g>
+    <g transform="translate(20 256)"><rect width="235" height="78" rx="15" fill="#fff" stroke="#d7ddea"/><circle cx="50" cy="39" r="21" fill="#16a085"/><path d="M39 39l8 8 15-18" stroke="#fff" stroke-width="4" fill="none"/><text x="100" y="34" class="cardtitle ink">Delivery</text><text x="100" y="57" class="small muted">proceed or pause</text></g>
+  </g>
+
+  <path d="M1300 425H1350" class="line"/>
+  <g transform="translate(1355 280)" filter="url(#shadow)">
+    <rect width="195" height="290" rx="22" fill="#fff" stroke="#16a085" stroke-width="2"/>
+    <circle cx="98" cy="78" r="46" fill="#eaf9f5" stroke="#16a085" stroke-width="3"/>
+    <path d="M75 86c10 17 35 17 45 0M75 70c10-17 35-17 45 0" stroke="#16a085" stroke-width="5" fill="none"/>
+    <text x="98" y="154" text-anchor="middle" class="cardtitle ink">Improve</text>
+    <text x="98" y="192" text-anchor="middle" class="body muted">Protect users</text>
+    <text x="98" y="220" text-anchor="middle" class="body muted">Restore budget</text>
+    <text x="98" y="248" text-anchor="middle" class="body muted">Learn &amp; adapt</text>
+  </g>
+
+  <path d="M1452 650v55c0 30-25 55-55 55H203c-30 0-55-25-55-55v-55" stroke="#6d42e8" stroke-width="4" stroke-dasharray="12 10" fill="none" marker-end="url(#arrow)"/>
+  <rect x="570" y="733" width="460" height="54" rx="27" fill="#fff" stroke="#d5c8f7" stroke-width="2"/>
+  <text x="800" y="767" text-anchor="middle" class="cardtitle" fill="#6028bd">Continuous reliability feedback</text>
+
+  <g transform="translate(70 820)"><rect width="700" height="58" rx="18" fill="#eef6ff" stroke="#9cc5ff"/><text x="28" y="36" class="small ink"><tspan font-weight="700">SERVICE TEAMS</tspan><tspan> — Own objectives, services, runbooks, and improvement actions</tspan></text></g>
+  <g transform="translate(830 820)"><rect width="700" height="58" rx="18" fill="#f6f0ff" stroke="#c5a8f5"/><text x="28" y="36" class="small ink"><tspan font-weight="700">PLATFORM TEAM</tspan><tspan> — Own contracts, evaluation, evidence, and paved-road controls</tspan></text></g>
+</svg>

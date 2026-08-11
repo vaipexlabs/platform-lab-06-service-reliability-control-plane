@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Dependencies and generated output
+node_modules/
+vendor/
+bin/
+build/
+dist/
+coverage/
+tmp/
+
+# Runtime data
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Test and tool caches
+.cache/
+.pytest_cache/
+.terraform/
+*.tfstate
+*.tfstate.*
+
